@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHOP SAMM X MODZ VIP 🛍️</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="logo">SHOP SAMM X MODZ VIP 🛍️</div>
+  <div id="nav"><a href="/login.html">Đăng nhập</a><a href="/register.html">Đăng ký</a></div>
+</nav>
+
+<div class="container">
+  <div class="card" style="text-align:center;padding:50px 24px">
+    <h1 style="font-size:42px">🔥 SHOP SAMM X MODZ VIP 🔥</h1>
+    <p style="font-size:18px;color:#ccc;margin-top:10px">Nơi mua sắm & chia sẻ file xịn nhất Việt Nam</p>
+    <p style="margin-top:10px;color:#888" id="welcome"></p>
+  </div>
+
+  <div class="grid" style="margin-top:24px">
+    <div class="card" style="text-align:center">
+      <div style="font-size:50px">🎁</div>
+      <h3 style="margin:10px 0">MOD VIP</h3>
+      <p style="color:#aaa">Hàng chất lượng cao cấp, cập nhật liên tục</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:50px">📁</div>
+      <h3 style="margin:10px 0">FILE XỊN</h3>
+      <p style="color:#aaa">Tải file free mỗi ngày, tốc độ cao</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:50px">⚡</div>
+      <h3 style="margin:10px 0">NHANH - UY TÍN</h3>
+      <p style="color:#aaa">Giao dịch tốc hành, bảo mật 100%</p>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:50px">💎</div>
+      <h3 style="margin:10px 0">THÀNH VIÊN VIP</h3>
+      <p style="color:#aaa">Ưu đãi đặc biệt cho khách hàng thân thiết</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:24px">
+    <h2>📢 Thông báo</h2>
+    <p style="color:#ccc;line-height:1.8">
+      • Chào mừng bạn đến với SHOP SAMM X MODZ VIP!<br>
+      • Đăng ký tài khoản để trải nghiệm đầy đủ tính năng.<br>
+      • Upload file và nhận link chia sẻ trực tiếp.<br>
+      • Mọi thắc mắc liên hệ admin qua mục Tài khoản.
+    </p>
+  </div>
+</div>
+
+<footer>© 2025 SHOP SAMM X MODZ VIP — Made with 💖</footer>
+
+<script>
+fetch('/api/me').then(r=>r.json()).then(d=>{
+  const nav = document.getElementById('nav');
+  if (d.user) {
+    nav.innerHTML = `
+      <a href="/">Trang chủ</a>
+      <a href="/orders.html">Đơn hàng</a>
+      <a href="/history.html">Lịch sử tải</a>
+      <a href="/account.html">👤 ${d.user}</a>
+      <a href="#" id="logout">Đăng xuất</a>`;
+    document.getElementById('welcome').textContent = `Xin chào ${d.user}! 👋`;
+    document.getElementById('logout').onclick = (e)=>{
+      e.preventDefault();
+      fetch('/api/logout',{method:'POST'}).then(()=>location.href='/login.html');
+    };
+  }
+});
+</script>
+</body>
+</html>
