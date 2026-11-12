@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đơn hàng — SHOP SAMM X MODZ VIP</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="logo">SHOP SAMM X MODZ VIP 🛍️</div>
+  <div id="nav">
+    <a href="/">Trang chủ</a>
+    <a href="/history.html">Lịch sử tải</a>
+    <a href="/account.html">Tài khoản</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h2>📦 Đặt hàng mới</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <input id="item" placeholder="Tên sản phẩm" style="flex:2;min-width:200px">
+      <input id="price" type="number" placeholder="Giá (VNĐ)" style="flex:1;min-width:150px">
+      <button onclick="add()" style="width:auto;padding:12px 24px">➕ Đặt hàng</button>
+    </div>
+    <div id="msg" class="msg"></div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h2>📋 Danh sách đơn hàng</h2>
+    <div id="list"><p style="color:#888">Đang tải...</p></div>
+  </div>
+</div>
+
+<footer>© 2025 SHOP SAMM X MODZ VIP</footer>
+
+<script>
+async function load(){
+  const r = await fetch('/api/orders');
+  const d = await r.json();
+  const list = document.getElementById('list');
+  if (!d.orders || d.orders.length === 0){
+    list.innerHTML = '<p style="color:#888">Chưa có đơn hàng nào. Hãy đặt đơn đầu tiên!</p>';
+    return;
+  }
+  list.innerHTML = d.orders.map(o=>`
+    <div class="order-item">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <b style="color:#ff00cc">${o.id}</b>
+        <span class="badge">${o.status}</span>
+      </div>
+      <div style="margin-top:6px">🛒 ${o.item}</div>
+      <div style="margin-top:4px;color:#00ffee">💰 ${Number(o.price).toLocaleString('vi-VN')} VNĐ</div>
+      <div style="margin-top:4px;color:#888;font-size:12px">
+        ${new Date(o.createdAt).toLocaleString('vi-VN')}
+      </div>
+    </div>`).join('');
+}
+
+async function add(){
+  const item = document.getElementById('item').value.trim();
+  const price = document.getElementById('price').value;
+  const msg = document.getElementById('msg');
+  if (!item){ msg.className='msg err'; msg.textContent='❌ Nhập tên sản phẩm'; return; }
+  await fetch('/api/orders',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({item, price:Number(price)||0})
+  });
+  document.getElementById('item').value = '';
+  document.getElementById('price').value = '';
+  msg.className='msg ok'; msg.textContent='✅ Đặt hàng thành công!';
+  setTimeout(()=>msg.textContent='', 2000);
+  load();
+}
+
+load();
+</script>
+</body>
+</html>
