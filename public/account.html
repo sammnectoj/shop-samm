@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tài khoản — SHOP SAMM X MODZ VIP</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="logo">SHOP SAMM X MODZ VIP 🛍️</div>
+  <div id="nav">
+    <a href="/">Trang chủ</a>
+    <a href="/orders.html">Đơn hàng</a>
+    <a href="/history.html">Lịch sử tải</a>
+    <a href="#" id="logout">Đăng xuất</a>
+  </div>
+</nav>
+
+<div class="container" style="max-width:480px">
+  <div class="card" style="text-align:center">
+    <div style="font-size:70px">👤</div>
+    <h2 style="margin-top:10px">Xin chào, <span id="uname" style="color:#00ffee">...</span></h2>
+    <p style="color:#888">Thành viên SHOP SAMM X MODZ VIP</p>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h2>🔑 Đổi mật khẩu</h2>
+    <input id="old" type="password" placeholder="Mật khẩu cũ" autocomplete="current-password">
+    <input id="new" type="password" placeholder="Mật khẩu mới (>= 4 ký tự)" autocomplete="new-password">
+    <input id="new2" type="password" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password">
+    <button onclick="change()">Đổi mật khẩu</button>
+    <div id="msg" class="msg"></div>
+  </div>
+</div>
+
+<footer>© 2025 SHOP SAMM X MODZ VIP</footer>
+
+<script>
+fetch('/api/me').then(r=>r.json()).then(d=>{
+  if (!d.user) return location.href='/login.html';
+  document.getElementById('uname').textContent = d.user;
+});
+
+document.getElementById('logout').onclick = (e)=>{
+  e.preventDefault();
+  fetch('/api/logout',{method:'POST'}).then(()=>location.href='/login.html');
+};
+
+async function change(){
+  const oldPassword = document.getElementById('old').value;
+  const newPassword = document.getElementById('new').value;
+  const new2 = document.getElementById('new2').value;
+  const msg = document.getElementById('msg');
+  if (!oldPassword || !newPassword){ msg.className='msg err'; msg.textContent='❌ Nhập đủ thông tin'; return; }
+  if (newPassword !== new2){ msg.className='msg err'; msg.textContent='❌ Mật khẩu nhập lại không khớp'; return; }
+  const r = await fetch('/api/change-password',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({oldPassword,newPassword})
+  });
+  const d = await r.json();
+  if (d.ok){
+    msg.className='msg ok'; msg.textContent='✅ '+d.message;
+    document.getElementById('old').value='';
+    document.getElementById('new').value='';
+    document.getElementById('new2').value='';
+  } else {
+    msg.className='msg err'; msg.textContent='❌ '+d.error;
+  }
+}
+</script>
+</body>
+</html>
