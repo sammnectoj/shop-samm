@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng nhập — SHOP SAMM X MODZ VIP</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="logo">SHOP SAMM X MODZ VIP 🛍️</div>
+  <div><a href="/">Trang chủ</a><a href="/register.html">Đăng ký</a></div>
+</nav>
+
+<div class="container" style="max-width:440px">
+  <div class="card" style="margin-top:60px">
+    <h2 style="text-align:center;font-size:28px">🔐 Đăng nhập</h2>
+    <p style="text-align:center;color:#888;margin-bottom:15px">Chào mừng trở lại!</p>
+    <input id="u" placeholder="Tên đăng nhập" autocomplete="username">
+    <input id="p" type="password" placeholder="Mật khẩu" autocomplete="current-password">
+    <button onclick="login()">Đăng nhập</button>
+    <div id="msg" class="msg"></div>
+    <p style="margin-top:16px;text-align:center;font-size:14px">
+      Chưa có tài khoản? <a class="link" href="/register.html">Đăng ký ngay</a>
+    </p>
+  </div>
+</div>
+
+<script>
+async function login(){
+  const u = document.getElementById('u').value.trim();
+  const p = document.getElementById('p').value;
+  const msg = document.getElementById('msg');
+  if (!u || !p){ msg.className='msg err'; msg.textContent='❌ Vui lòng nhập đủ thông tin'; return; }
+  msg.className='msg'; msg.textContent='⏳ Đang đăng nhập...';
+  const r = await fetch('/api/login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username:u,password:p})
+  });
+  const d = await r.json();
+  if (d.ok){
+    msg.className='msg ok'; msg.textContent='✅ Đăng nhập thành công!';
+    setTimeout(()=>location.href='/', 600);
+  } else {
+    msg.className='msg err'; msg.textContent='❌ '+d.error;
+  }
+}
+document.getElementById('p').addEventListener('keydown', e=>{ if(e.key==='Enter') login(); });
+</script>
+</body>
+</html>
