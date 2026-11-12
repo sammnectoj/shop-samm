@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lịch sử tải FILE — SHOP SAMM X MODZ VIP</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="logo">SHOP SAMM X MODZ VIP 🛍️</div>
+  <div id="nav">
+    <a href="/">Trang chủ</a>
+    <a href="/orders.html">Đơn hàng</a>
+    <a href="/account.html">Tài khoản</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h2>📁 Tải FILE lên</h2>
+    <p style="color:#888;margin-bottom:10px">Chọn file từ thư viện ảnh hoặc máy — hỗ trợ ảnh, tài liệu... tối đa 20MB</p>
+    <input type="file" id="file" accept="image/*,application/*">
+    <button onclick="up()">⬆️ Tải lên ngay</button>
+    <div id="msg" class="msg"></div>
+    <div id="preview" style="margin-top:15px"></div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h2>🕘 Lịch sử tải FILE của bạn</h2>
+    <div id="list" class="grid"><p style="color:#888">Đang tải...</p></div>
+  </div>
+</div>
+
+<footer>© 2025 SHOP SAMM X MODZ VIP</footer>
+
+<script>
+// Preview ảnh trước khi up
+document.getElementById('file').addEventListener('change', e=>{
+  const f = e.target.files[0];
+  const pv = document.getElementById('preview');
+  if (f && f.type.startsWith('image/')){
+    const url = URL.createObjectURL(f);
+    pv.innerHTML = `<img src="${url}" style="max-width:200px;border-radius:10px;border:2px solid #ff00cc">`;
+  } else pv.innerHTML = '';
+});
+
+async function up(){
+  const f = document.getElementById('file').files[0];
+  const msg = document.getElementById('msg');
+  if (!f){ msg.className='msg err'; msg.textContent='❌ Chưa chọn file'; return; }
+  msg.className='msg'; msg.textContent='⏳ Đang tải lên...';
+  const fd = new FormData();
+  fd.append('file', f);
+  const r = await fetch('/api/upload',{method:'POST',body:fd});
+  const d = await r.json();
+  if (d.ok){
+    msg.className='msg ok'; msg.textContent='✅ Upload thành công!';
+    document.getElementById('file').value='';
+    document.getElementById('preview').innerHTML='';
+    load();
+  } else {
+    msg.className='msg err'; msg.textContent='❌ '+d.error;
+  }
+}
+
+async function load(){
+  const r = await fetch('/api/history');
+  const d = await r.json();
+  const list = document.getElementById('list');
+  if (!d.history || d.history.length === 0){
+    list.innerHTML = '<p style="color:#888">Chưa có file nào. Hãy upload file đầu tiên!</p>';
+    return;
+  }
+  list.innerHTML = d.history.map(h=>{
+    const isImg = h.mime.startsWith('image/');
+    const link = location.origin + h.url;
+    return `<div class="file-card">
+      ${isImg
+        ? `<img src="${h.url}" alt="${h.originalName}">`
+        : `<div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:60px;background:rgba(255,255,255,.05)">📄</div>`}
+      <div class="info">
+        <b>${h.originalName}</b><br>
+        <span style="color:#888">${(h.size/1024).toFixed(1)} KB</span><br>
+        <div style="margin-top:6px">🔗 <a href="${h.url}" target="_blank">${link}</a></div>
+        <div style="margin-top:4px;color:#555;font-size:11px">${new Date(h.uploadedAt).toLocaleString('vi-VN')}</div>
+        <button onclick="copyLink('${link}')" style="margin-top:8px;padding:6px;font-size:12px">📋 Copy link</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function copyLink(link){
+  navigator.clipboard.writeText(link).then(()=>alert('✅ Đã copy: '+link));
+}
+
+load();
+</script>
+</body>
+</html>
