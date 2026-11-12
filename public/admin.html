@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — SHOP SAMM X MODZ VIP</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* CSS riêng cho Admin cho chất hơn */
+  .admin-header { text-align: center; margin-bottom: 30px; }
+  .admin-header h1 { font-size: 32px; text-shadow: 0 0 20px #ff00cc; }
+  
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+  .stat-box { 
+    background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 15px; 
+    text-align: center; border: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.1); transition: 0.3s;
+  }
+  .stat-box:hover { transform: translateY(-5px); border-color: #00ffee; box-shadow: 0 0 25px rgba(0, 255, 255, 0.4); }
+  .stat-box h3 { font-size: 14px; color: #aaa; margin-bottom: 10px; }
+  .stat-box h1 { font-size: 36px; color: #00ffee; text-shadow: 0 0 10px #00ffee; }
+  
+  .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+  .tab-btn { 
+    background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); 
+    padding: 10px 20px; border-radius: 10px; cursor: pointer; white-space: nowrap; font-weight: bold;
+  }
+  .tab-btn.active { background: linear-gradient(90deg, #ff00cc, #3333ff); border-color: transparent; box-shadow: 0 0 15px rgba(255,0,204,0.5); }
+  
+  .admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,.08); text-align: left; }
+  .admin-table th { color: #ff00cc; font-weight: bold; }
+  .admin-table tr:hover { background: rgba(255,255,255,.03); }
+  
+  .file-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid #3333ff; }
+  .link-file { color: #00ffee; text-decoration: none; font-weight: bold; word-break: break-all; }
+  .link-file:hover { text-decoration: underline; text-shadow: 0 0 10px #00ffee; }
+  .tag { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; background: linear-gradient(90deg, #3333ff, #ff00cc); }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="logo">👑 ADMIN SHOP SAMM X MODZ VIP</div>
+  <div><a href="/">Về Trang Chủ</a><a href="#" id="logout">Đăng xuất</a></div>
+</nav>
+
+<div class="container" id="mainApp" style="display:none">
+  <div class="admin-header">
+    <h1>📊 BẢNG ĐIỀU KHIỂN</h1>
+    <p style="color:#aaa">Chào mừng Admin quay trở lại!</p>
+  </div>
+
+  <!-- Thống kê -->
+  <div class="stats-grid">
+    <div class="stat-box">
+      <h3>👥 TỔNG USER</h3>
+      <h1 id="totalUsers">0</h1>
+    </div>
+    <div class="stat-box">
+      <h3>📁 TỔNG FILE</h3>
+      <h1 id="totalFiles">0</h1>
+    </div>
+    <div class="stat-box">
+      <h3>📦 TỔNG ĐƠN HÀNG</h3>
+      <h1 id="totalOrders">0</h1>
+    </div>
+  </div>
+
+  <!-- Thanh chuyển tab -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('files')">📁 Quản lý FILE & Ảnh</button>
+    <button class="tab-btn" onclick="switchTab('users')">👥 Người dùng</button>
+    <button class="tab-btn" onclick="switchTab('orders')">📦 Đơn hàng</button>
+  </div>
+
+  <!-- Tab Quản lý File (Mặc định hiển thị) -->
+  <div id="tab-files" class="card">
+    <h2>📁 Lịch sử tải FILE của toàn bộ User</h2>
+    <div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Ảnh</th>
+            <th>Tên File Gốc</th>
+            <th>Link File (Click để xem)</th>
+            <th>Người Tải</th>
+            <th>Dung lượng</th>
+          </tr>
+        </thead>
+        <tbody id="fileList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab Người dùng -->
+  <div id="tab-users" class="card" style="display:none">
+    <h2>👥 Danh sách người dùng</h2>
+    <div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Tên đăng nhập</th>
+            <th>Ngày tham gia</th>
+            <th>Mật khẩu</th>
+          </tr>
+        </thead>
+        <tbody id="userList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab Đơn hàng -->
+  <div id="tab-orders" class="card" style="display:none">
+    <h2>📦 Tất cả đơn hàng</h2>
+    <div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Mã Đơn</th>
+            <th>Người Đặt</th>
+            <th>Sản Phẩm</th>
+            <th>Giá</th>
+            <th>Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody id="orderList"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="container" id="errorMsg" style="display:none">
+  <div class="card" style="text-align:center;margin-top:50px">
+    <h1 style="color:#ff5577">🚫 TRUY CẬP BỊ TỪ CHỐI</h1>
+    <p>Bạn không phải là Admin! Vui lòng quay lại trang chủ.</p>
+    <a href="/" class="link">Quay lại trang chủ</a>
+  </div>
+</div>
+
+<script>
+const ADMIN_USERNAME = "admin"; 
+
+fetch('/api/me').then(r=>r.json()).then(d=>{
+  if (!d.user) return location.href='/login.html';
+  
+  if (d.user !== ADMIN_USERNAME) {
+    document.getElementById('errorMsg').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('mainApp').style.display = 'block';
+  loadData();
+});
+
+document.getElementById('logout').onclick = (e)=>{
+  e.preventDefault();
+  fetch('/api/logout',{method:'POST'}).then(()=>location.href='/login.html');
+};
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  document.getElementById('tab-files').style.display = 'none';
+  document.getElementById('tab-users').style.display = 'none';
+  document.getElementById('tab-orders').style.display = 'none';
+  
+  document.getElementById('tab-' + tabName).style.display = 'block';
+}
+
+async function loadData() {
+  const res = await fetch('/api/admin/data');
+  const data = await res.json();
+  
+  if (data.error) return alert(data.error);
+
+  document.getElementById('totalUsers').innerText = data.users.length;
+  document.getElementById('totalFiles').innerText = data.history.length;
+  document.getElementById('totalOrders').innerText = data.orders.length;
+
+  // Render DANH SÁCH FILE (Có ảnh, tên, link)
+  if (data.history.length === 0) {
+    document.getElementById('fileList').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888">Chưa có ai tải file lên.</td></tr>';
+  } else {
+    // Đảo ngược để file mới nhất lên đầu
+    const sortedFiles = [...data.history].sort((a,b) => b.uploadedAt - a.uploadedAt);
+    document.getElementById('fileList').innerHTML = sortedFiles.map(f => {
+      const isImg = f.mime.startsWith('image/');
+      return `
+      <tr>
+        <td>
+          ${isImg 
+            ? `<img src="${f.url}" class="file-thumb" alt="ảnh">` 
+            : `<div class="file-thumb" style="display:flex;align-items:center;justify-content:center;background:#222;font-size:24px">📄</div>`}
+        </td>
+        <td style="color:#fff; font-weight:bold">${f.originalName}</td>
+        <td>
+          <a href="${f.url}" target="_blank" class="link-file">🔗 Xem File</a>
+        </td>
+        <td><span class="tag">${f.owner}</span></td>
+        <td style="color:#888">${(f.size/1024).toFixed(1)} KB</td>
+      </tr>
+      `;
+    }).join('');
+  }
+
+  // Render USERS
+  document.getElementById('userList').innerHTML = data.users.map(u => `
+    <tr>
+      <td style="color:#ff00cc; font-weight:bold">${u.username}</td>
+      <td style="color:#ccc">${new Date(u.createdAt).toLocaleString('vi-VN')}</td>
+      <td style="color:#888">${u.password}</td>
+    </tr>
+  `).join('');
+
+  // Render ORDERS
+  if (data.orders.length === 0) {
+    document.getElementById('orderList').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888">Chưa có đơn hàng nào.</td></tr>';
+  } else {
+    document.getElementById('orderList').innerHTML = data.orders.map(o => `
+      <tr>
+        <td style="color:#00ffee">${o.id}</td>
+        <td style="font-weight:bold">${o.owner}</td>
+        <td>${o.item}</td>
+        <td style="color:#ff00cc">${Number(o.price).toLocaleString('vi-VN')}đ</td>
+        <td><span class="badge">${o.status}</span></td>
+      </tr>
+    `).join('');
+  }
+}
+</script>
+</body>
+</html>
