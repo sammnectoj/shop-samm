@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng ký — SHOP SAMM X MODZ VIP</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="logo">SHOP SAMM X MODZ VIP 🛍️</div>
+  <div><a href="/">Trang chủ</a><a href="/login.html">Đăng nhập</a></div>
+</nav>
+
+<div class="container" style="max-width:440px">
+  <div class="card" style="margin-top:60px">
+    <h2 style="text-align:center;font-size:28px">📝 Đăng ký</h2>
+    <p style="text-align:center;color:#888;margin-bottom:15px">Tạo tài khoản mới miễn phí</p>
+    <input id="u" placeholder="Tên đăng nhập (>= 3 ký tự, không trùng)" autocomplete="username">
+    <input id="p" type="password" placeholder="Mật khẩu (>= 4 ký tự)" autocomplete="new-password">
+    <input id="p2" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password">
+    <button onclick="reg()">Đăng ký</button>
+    <div id="msg" class="msg"></div>
+    <p style="margin-top:16px;text-align:center;font-size:14px">
+      Đã có tài khoản? <a class="link" href="/login.html">Đăng nhập</a>
+    </p>
+  </div>
+</div>
+
+<script>
+async function reg(){
+  const u = document.getElementById('u').value.trim();
+  const p = document.getElementById('p').value;
+  const p2 = document.getElementById('p2').value;
+  const msg = document.getElementById('msg');
+  if (!u || !p){ msg.className='msg err'; msg.textContent='❌ Vui lòng nhập đủ thông tin'; return; }
+  if (p !== p2){ msg.className='msg err'; msg.textContent='❌ Mật khẩu nhập lại không khớp'; return; }
+  msg.className='msg'; msg.textContent='⏳ Đang xử lý...';
+  const r = await fetch('/api/register',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username:u,password:p})
+  });
+  const d = await r.json();
+  if (d.ok){
+    msg.className='msg ok'; msg.textContent='✅ Đăng ký thành công! Đang chuyển trang...';
+    setTimeout(()=>location.href='/login.html', 800);
+  } else {
+    msg.className='msg err'; msg.textContent='❌ '+d.error;
+  }
+}
+</script>
+</body>
+</html>
